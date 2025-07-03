@@ -1,10 +1,7 @@
 import { useState } from 'react';
-import { Box, IconButton, TextField } from '@mui/material';
+import { Box, Button, IconButton, TextField } from '@mui/material';
 import { ArrowLeft, ArrowRight, Close, Pause, PlayArrow } from '@mui/icons-material';
 import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
-// import videoshow from 'videoshow';
-// import ffmpeg from 'fluent-ffmpeg';
-// import ffmpeg from 'ffmpeg';
 
 function Player() {
   const [videoURL, setVideoURL] = useState('');
@@ -68,11 +65,13 @@ function Player() {
     } else {
       console.error('wrong');
     }
-
-    // create video from images
-    // videoshow(clipBuffer).save('out.mp4').on('error', () => { console.warning('error')}).on('end', () => { console.info('done') });
-    // ffmpeg(clipBuffer).on('end', () => console.info('done')).on('error', () => console.warn('error')).save('out.mp4');
   };
+
+  const saveImages = () => {
+    for (let img in clipBuffer) {
+      window.location.href = img;
+    }
+  }
 
   // clip start/end logic
   if (startTime) {
@@ -140,6 +139,7 @@ function Player() {
           Clip end: {endTime ?? 'N/A'}s
         </Box>
         <canvas id='output-canvas' />
+        <Button onClick={saveImages} >Download images</Button>
       </div>) :
       (<>
         <p>Select a video first!</p>
