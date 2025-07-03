@@ -7,9 +7,8 @@ function Player() {
   const [videoPaused, setVideoPaused] = useState(true);
   const [videoSelected, setVideoSelected] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [startTime, setStartTime] = useState(0);
-  const [endTime, setEndTime] = useState(0);
-
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
 
   const togglePlay = async () => {
     const videoPlayer = document.getElementById('my-video');
@@ -31,6 +30,24 @@ function Player() {
 
   const setEndMark = () => {
     setEndTime(currentTime);
+  }
+
+  // clip start/end logic
+  if (startTime) {
+    if (currentTime < startTime) {
+      const videoPlayer = document.getElementById('my-video');
+      !videoPlayer.paused && togglePlay();
+      videoPlayer.currentTime = startTime;
+    }
+  }
+
+  if (endTime) {
+    // the end is nigh
+    if (currentTime > endTime) {
+      const videoPlayer = document.getElementById('my-video');
+      !videoPlayer.paused && togglePlay();
+      videoPlayer.currentTime = startTime; // loop from beginning of clip
+    }
   }
 
   return (
