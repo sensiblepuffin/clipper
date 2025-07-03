@@ -4,25 +4,32 @@ import { ArrowLeft, ArrowRight, Close, Pause, PlayArrow } from '@mui/icons-mater
 
 function Player() {
   const [videoURL, setVideoURL] = useState('');
+  const [videoPaused, setVideoPaused] = useState(true);
   const [videoSelected, setVideoSelected] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
-  console.info('video', videoURL);
-  console.info('current', currentTime);
 
-  const videoPlayer = document.getElementById('my-video');
-  console.info('video', videoPlayer);
 
-  const togglePlay = () => {
-    videoPlayer.paused ? videoPlayer.play() : videoPlayer.pause();
+  const togglePlay = async () => {
+    const videoPlayer = document.getElementById('my-video');
+    if (videoPlayer?.paused) {
+      try { 
+        await videoPlayer.play() 
+      } catch (err) { 
+        console.warning('err', err); 
+      }
+    } else {
+      videoPlayer.pause();
+    }
+    setVideoPaused(videoPlayer.paused);
   }
 
-  const setStartMark = (time) => {
+  const setStartMark = () => {
     setStartTime(currentTime);
   }
 
-  const setEndMark = (time) => {
+  const setEndMark = () => {
     setEndTime(currentTime);
   }
 
@@ -52,18 +59,18 @@ function Player() {
           </p>
         </video>
         <Box sx={{ justifyContent: 'center' }}>
-        <IconButton onClick={togglePlay}>
-          {videoPlayer.paused ? <PlayArrow /> : <Pause />}
-        </IconButton>
-        <IconButton onClick={setStartMark}>
-          <ArrowRight  />
-        </IconButton>
-        <IconButton onClick={setEndMark}>
-          <ArrowLeft />
-        </IconButton>
-        <IconButton>
-          <Close onClick={() => setVideoSelected(false)} />
-        </IconButton>
+          <IconButton onClick={togglePlay}>
+            {videoPaused ? <PlayArrow /> : <Pause />}
+          </IconButton>
+          <IconButton onClick={setStartMark}>
+            <ArrowRight />
+          </IconButton>
+          <IconButton onClick={setEndMark}>
+            <ArrowLeft />
+          </IconButton>
+          <IconButton>
+            <Close onClick={() => setVideoSelected(false)} />
+          </IconButton>
         </Box>
         <Box>
           Timestamp: {currentTime}s
@@ -74,7 +81,9 @@ function Player() {
       (<>
         <p>Select a video first!</p>
         <TextField id="outlined-basic" onChange={(evt) => setVideoURL(evt.target.value)} />
-        
+        <IconButton>
+          <PlayArrow onClick={() => setVideoSelected(true)} />
+        </IconButton>
       </>)
   );
 }

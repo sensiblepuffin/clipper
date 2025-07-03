@@ -7,7 +7,7 @@ function App() {
   return (
     <div className="App">
       <Grid container>
-        <Grid item size={6}>
+        <Grid size={12}>
           <Player />
         </Grid>
       </Grid>
