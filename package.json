@@ -12,6 +12,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "path-browserify": "^1.0.1",
     "react-scripts": "5.0.1",
     "video.js": "^8.23.3",
     "web-vitals": "^2.1.4"

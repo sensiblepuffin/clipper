@@ -1,6 +1,10 @@
 import { useState } from 'react';
-import { Box, Button, IconButton, TextField } from '@mui/material';
+import { Box, IconButton, TextField } from '@mui/material';
 import { ArrowLeft, ArrowRight, Close, Pause, PlayArrow } from '@mui/icons-material';
+import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
+// import videoshow from 'videoshow';
+// import ffmpeg from 'fluent-ffmpeg';
+// import ffmpeg from 'ffmpeg';
 
 function Player() {
   const [videoURL, setVideoURL] = useState('');
@@ -10,13 +14,17 @@ function Player() {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
 
+  var clipBuffer = [];
+  const canvas = document.getElementById('output-canvas');
+  const ctx = canvas?.getContext('2d');
+
   const togglePlay = async () => {
     const videoPlayer = document.getElementById('my-video');
     if (videoPlayer?.paused) {
-      try { 
-        await videoPlayer.play() 
-      } catch (err) { 
-        console.warning('err', err); 
+      try {
+        await videoPlayer.play()
+      } catch (err) {
+        console.warning('err', err);
       }
     } else {
       videoPlayer.pause();
@@ -31,6 +39,40 @@ function Player() {
   const setEndMark = () => {
     setEndTime(currentTime);
   }
+
+  const updateCanvas = async (now, metadata) => {
+    const video = document.getElementById('my-video');
+
+    console.info('now, start, end', metadata.mediaTime, startTime, endTime);
+    if (metadata.mediaTime >= startTime) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const bitmap = await createImageBitmap(video);
+      const index = clipBuffer.length;
+      clipBuffer.push(bitmap);
+      const elapsed = (metadata.mediaTime - startTime) / 1000.0;
+      const fps = (index / elapsed).toFixed(3);
+      console.info('elapsed', elapsed, 'fps', fps);
+
+      if (metadata.mediaTime <= endTime) {
+        // Re-register the callback to run on the next frame
+        video.requestVideoFrameCallback(updateCanvas);
+      }
+    }
+  };
+
+  const dumpClip = () => {
+    const video = document.getElementById('my-video');
+    if ("requestVideoFrameCallback" in HTMLVideoElement.prototype) {
+      video.requestVideoFrameCallback(updateCanvas);
+    } else {
+      console.error('wrong');
+    }
+
+    // create video from images
+    // videoshow(clipBuffer).save('out.mp4').on('error', () => { console.warning('error')}).on('end', () => { console.info('done') });
+    // ffmpeg(clipBuffer).on('end', () => console.info('done')).on('error', () => console.warn('error')).save('out.mp4');
+  };
 
   // clip start/end logic
   if (startTime) {
@@ -70,12 +112,12 @@ function Player() {
           <p class="vjs-no-js">
             To view this video please enable JavaScript, and consider upgrading to a
             web browser that
-            <a href="https://videojs.com/html5-video-support/" target="_blank"
+            <a href="https://videojs.com/html5-video-support/" rel="noreferrer" target="_blank"
             >supports HTML5 video</a
             >
           </p>
         </video>
-        <Box sx={{ justifyContent: 'center' }}>
+        <Box sx={{ justifyContent: 'space-between' }}>
           <IconButton onClick={togglePlay}>
             {videoPaused ? <PlayArrow /> : <Pause />}
           </IconButton>
@@ -85,15 +127,19 @@ function Player() {
           <IconButton onClick={setEndMark}>
             <ArrowLeft />
           </IconButton>
+          <IconButton onClick={dumpClip}>
+            <VideoCameraBackIcon />
+          </IconButton>
           <IconButton>
             <Close onClick={() => setVideoSelected(false)} />
           </IconButton>
         </Box>
         <Box>
           Timestamp: {currentTime}s
-          Clip start: {startTime}s
-          Clip end: {endTime}s
+          Clip start: {startTime ?? 'N/A'}s
+          Clip end: {endTime ?? 'N/A'}s
         </Box>
+        <canvas id='output-canvas' />
       </div>) :
       (<>
         <p>Select a video first!</p>
